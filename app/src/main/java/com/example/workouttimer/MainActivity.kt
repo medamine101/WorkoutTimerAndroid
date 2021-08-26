@@ -5,11 +5,9 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.FILL_IN_ACTION
 import android.content.IntentFilter
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -37,10 +35,11 @@ class MainActivity : AppCompatActivity() {
 
     private var notificationManager: NotificationManagerCompat? = null
 
+    //broadcast receiver object
     private var myReceiver: BroadcastReceiver = object: BroadcastReceiver() {
+        //Method to run upon receiving the broadcast Intent
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d("thami", "received message")
-            var x = context as MainActivity
+            val x = context as MainActivity
             x.onNotificationClick()
         }
     }
@@ -64,38 +63,36 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(myReceiver)
+    }
+
     //Method called when button clicked and the timer is not running
     private fun startTimer(){
 
         countDownTimer = object : CountDownTimer(timeLeftMilliseconds, 1000) {
             //Method called every tick
             override fun onTick(millisUntilFinished: Long) {
-
                 timeLeftMilliseconds = millisUntilFinished
                 updateTime()
-
             }
             //Method for when timer finishes
             override fun onFinish() {
-
                 sendNotification()
                 stopTimer()
-
             }
         }.start()
 
         startButton?.text = getString(R.string.stop_button)
         timerRunning = true
-
     }
-
 
     //Called to stop the timer, also called on finish
     private fun stopTimer(){
         countDownTimer?.cancel()
         startButton?.text = getString(R.string.start_button)
         timerRunning = false
-
     }
 
     //Called to update the timer
@@ -112,43 +109,19 @@ class MainActivity : AppCompatActivity() {
 
         timerTextBox?.text = timerString
 
-        
-
-        
-
     }
 
     //Called when the button to start the timer is clicked
     fun onTimerButtonClick(view: View) {
-
         if (timerRunning) stopTimer()
         else startTimer()
     }
 
-    private fun createBroadcastIntent(
-        action: String, context: Context, instanceId: Int
-    ): PendingIntent {
-        val intent = Intent(action).setPackage(context.getPackageName())
-        return PendingIntent.getBroadcast(
-            context, instanceId, intent, PendingIntent.FLAG_CANCEL_CURRENT
-        )
-    }
     //Called when timer hits 0
     fun sendNotification(){
-        
-        //val context: Context = applicationContext
 
         val intent = Intent("BLA")
-
-//        val pendingIntent1: PendingIntent = createBroadcastIntent("NOTHING", this, 0)
-        val pendingIntent1: PendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            intent,
-            FILL_IN_ACTION
-        )
-
+        val pendingIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
 
         val title = "TIME IS UP!"
         val message = "Click to reset the timer"
@@ -160,7 +133,7 @@ class MainActivity : AppCompatActivity() {
             .setDefaults(Notification.DEFAULT_ALL)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setContentIntent(pendingIntent1) //Put Intent in notification
+            .setContentIntent(pendingIntent) //Put Intent in notification
             //.addAction()
             .build()
 
@@ -182,12 +155,6 @@ class MainActivity : AppCompatActivity() {
         resetTimer(this.startButton as View)
         startTimer()
 
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        resetTimer(this.startButton as View)
-        startTimer()
-        super.onNewIntent(intent)
     }
 
 }
