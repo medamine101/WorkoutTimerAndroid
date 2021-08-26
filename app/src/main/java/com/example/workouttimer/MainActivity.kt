@@ -2,10 +2,14 @@ package com.example.workouttimer
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.FILL_IN_ACTION
+import android.content.IntentFilter
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -13,8 +17,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
+
+
 class MainActivity : AppCompatActivity() {
-    
+
      // TODO: Implement way to set custom time
 
     //Cannot be initialized with the value of the objects since onCreate needs to occur first
@@ -31,7 +37,13 @@ class MainActivity : AppCompatActivity() {
 
     private var notificationManager: NotificationManagerCompat? = null
 
-
+    private var myReceiver: BroadcastReceiver = object: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d("thami", "received message")
+            var x = context as MainActivity
+            x.onNotificationClick()
+        }
+    }
 
     //Method to run on App Launch
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         //Update the time on the App to display the default
         updateTime()
 
-
+        registerReceiver(myReceiver,  IntentFilter("BLA"))
 
     }
 
@@ -113,13 +125,23 @@ class MainActivity : AppCompatActivity() {
         else startTimer()
     }
 
+    private fun createBroadcastIntent(
+        action: String, context: Context, instanceId: Int
+    ): PendingIntent {
+        val intent = Intent(action).setPackage(context.getPackageName())
+        return PendingIntent.getBroadcast(
+            context, instanceId, intent, PendingIntent.FLAG_CANCEL_CURRENT
+        )
+    }
     //Called when timer hits 0
     fun sendNotification(){
         
         //val context: Context = applicationContext
 
-        val intent = Intent(this, MainActivity::class.java)
-        
+        val intent = Intent("BLA")
+
+//        val pendingIntent1: PendingIntent = createBroadcastIntent("NOTHING", this, 0)
+        val pendingIntent1: PendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             this,
             0,
@@ -138,7 +160,7 @@ class MainActivity : AppCompatActivity() {
             .setDefaults(Notification.DEFAULT_ALL)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setContentIntent(pendingIntent) //Put Intent in notification
+            .setContentIntent(pendingIntent1) //Put Intent in notification
             //.addAction()
             .build()
 
