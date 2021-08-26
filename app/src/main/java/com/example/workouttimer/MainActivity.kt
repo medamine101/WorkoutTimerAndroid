@@ -15,7 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 
 class MainActivity : AppCompatActivity() {
 
-    //Test comment
+    //hello git
      // TODO: Implement way to set custom time
 
     //Cannot be initialized with the value of the objects since onCreate needs to occur first
