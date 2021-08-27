@@ -16,7 +16,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
 
-
 class MainActivity : AppCompatActivity() {
 
      // TODO: Implement way to set custom time
@@ -39,8 +38,12 @@ class MainActivity : AppCompatActivity() {
     private var myReceiver: BroadcastReceiver = object: BroadcastReceiver() {
         //Method to run upon receiving the broadcast Intent
         override fun onReceive(context: Context?, intent: Intent?) {
-            val x = context as MainActivity
-            x.onNotificationClick()
+            //Ensuring that the intent matches what is wanted
+            if (intent?.action == "WORKOUT_TIMER_DONE"){
+                val givenContext = context as MainActivity
+                givenContext.onNotificationClick()
+                givenContext.notificationManager?.cancel(1)
+            }
         }
     }
 
@@ -59,10 +62,11 @@ class MainActivity : AppCompatActivity() {
         //Update the time on the App to display the default
         updateTime()
 
-        registerReceiver(myReceiver,  IntentFilter("BLA"))
+        registerReceiver(myReceiver,  IntentFilter("WORKOUT_TIMER_DONE"))
 
     }
 
+    //Unregister the broadcast receiver when user quits app
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(myReceiver)
@@ -112,6 +116,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     //Called when the button to start the timer is clicked
+    //The view parameter is not used but needed for Button onClick to work
+    @Suppress("UNUSED_PARAMETER")
     fun onTimerButtonClick(view: View) {
         if (timerRunning) stopTimer()
         else startTimer()
@@ -120,21 +126,23 @@ class MainActivity : AppCompatActivity() {
     //Called when timer hits 0
     fun sendNotification(){
 
-        val intent = Intent("BLA")
-        val pendingIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+        val intent = Intent("WORKOUT_TIMER_DONE")
+        val pendingIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         val title = "TIME IS UP!"
         val message = "Click to reset the timer"
 
-        val notification = NotificationCompat.Builder(this, NotificationsStuff.CHANNEL_1_ID)
+        //val action: Notification.Action = Notification.Action(R.drawable.ic_one, )
+
+        val notification = NotificationCompat.Builder(this, NotificationChannelCreator.CHANNEL_1_ID)
             .setSmallIcon(R.drawable.ic_one)
             .setContentTitle(title)
             .setContentText(message)
             .setDefaults(Notification.DEFAULT_ALL)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setContentIntent(pendingIntent) //Put Intent in notification
-            //.addAction()
+            //.setContentIntent(pendingIntent) //Put Intent in notification
+            .addAction(R.drawable.ic_one, "Reset Timer", pendingIntent)
             .build()
 
         notification.flags = Notification.FLAG_AUTO_CANCEL
@@ -144,6 +152,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     //Method to reset the timer: stop running timer, reset the time, then update the clock
+    //The view parameter is not used but needed for Button onClick to work
+    @Suppress("UNUSED_PARAMETER")
     fun resetTimer(view: View){
         if (timerRunning) stopTimer()
         timeLeftMilliseconds = originalTimerNumber

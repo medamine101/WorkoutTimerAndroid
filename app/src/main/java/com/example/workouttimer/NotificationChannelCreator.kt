@@ -7,12 +7,14 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 
-class NotificationsStuff: Application(){
+class NotificationChannelCreator: Application(){
 
+    //Allow the channel ID to be accessed without an instance of NotificationChannelCreator
     companion object{
         var CHANNEL_1_ID = "channel1"
     }
 
+    //Runs on app launch
     override fun onCreate() {
         super.onCreate()
 
@@ -20,6 +22,7 @@ class NotificationsStuff: Application(){
 
     }
 
+    //Creates notification channels on app launch, called by onCreate()
     private fun createNotificationChannels() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
@@ -29,8 +32,7 @@ class NotificationsStuff: Application(){
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
 
-
-            val manager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             manager.createNotificationChannel(channel1)
 
