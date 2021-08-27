@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     //Cannot be initialized with the value of the objects since onCreate needs to occur first
     private var timerTextBox: TextView? = null //set to null, value changed in onCreate()
+
     private var startButton: Button? = null //set to null, value changed in onCreate()
 
     private var countDownTimer: CountDownTimer? = null //set to null, value changed in startTimer()
@@ -34,12 +35,14 @@ class MainActivity : AppCompatActivity() {
 
     private var notificationManager: NotificationManagerCompat? = null
 
+    private val workoutTimerResetAction= "WORKOUT_TIMER_RESET"
+
     //broadcast receiver object
     private var myReceiver: BroadcastReceiver = object: BroadcastReceiver() {
         //Method to run upon receiving the broadcast Intent
         override fun onReceive(context: Context?, intent: Intent?) {
             //Ensuring that the intent matches what is wanted
-            if (intent?.action == "WORKOUT_TIMER_DONE"){
+            if (intent?.action == workoutTimerResetAction){
                 val givenContext = context as MainActivity
                 givenContext.onNotificationClick()
                 givenContext.notificationManager?.cancel(1)
@@ -62,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         //Update the time on the App to display the default
         updateTime()
 
-        registerReceiver(myReceiver,  IntentFilter("WORKOUT_TIMER_DONE"))
+        registerReceiver(myReceiver,  IntentFilter(workoutTimerResetAction))
 
     }
 
@@ -126,13 +129,16 @@ class MainActivity : AppCompatActivity() {
     //Called when timer hits 0
     fun sendNotification(){
 
-        val intent = Intent("WORKOUT_TIMER_DONE")
-        val pendingIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        //Create the two intents for the notification
+        val openAppIntent = Intent(this, MainActivity::class.java) //Intent to open app
+        val resetTimerIntent = Intent(workoutTimerResetAction) //Intent to reset timer
+
+        //Create the two pending intents for the notification
+        val openAppPendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, PendingIntent.FLAG_IMMUTABLE)
+        val resetTimerPendingIntent = PendingIntent.getBroadcast(this, 0, resetTimerIntent, PendingIntent.FLAG_IMMUTABLE)
 
         val title = "TIME IS UP!"
         val message = "Click to reset the timer"
-
-        //val action: Notification.Action = Notification.Action(R.drawable.ic_one, )
 
         val notification = NotificationCompat.Builder(this, NotificationChannelCreator.CHANNEL_1_ID)
             .setSmallIcon(R.drawable.ic_one)
@@ -141,8 +147,8 @@ class MainActivity : AppCompatActivity() {
             .setDefaults(Notification.DEFAULT_ALL)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            //.setContentIntent(pendingIntent) //Put Intent in notification
-            .addAction(R.drawable.ic_one, "Reset Timer", pendingIntent)
+            .setContentIntent(openAppPendingIntent)
+            .addAction(R.drawable.ic_one, "Reset Timer", resetTimerPendingIntent)
             .build()
 
         notification.flags = Notification.FLAG_AUTO_CANCEL
@@ -166,5 +172,11 @@ class MainActivity : AppCompatActivity() {
         startTimer()
 
     }
+
+    //Called when the notification is pressed
+    override fun onNewIntent(intent: Intent?) {
+        this.resetTimer(this.startButton as View) //Timer is reset
+        super.onNewIntent(intent)
+   }
 
 }
