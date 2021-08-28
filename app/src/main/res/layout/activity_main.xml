@@ -13,7 +13,9 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="265dp"
-        android:text="TextView" />
+        android:minHeight="48dp"
+        android:onClick="onTimerTextBoxClick"
+        android:text="@string/TimerTextBoxInit" />
 
     <Button
         android:id="@+id/startTimerButton"
@@ -33,6 +35,19 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="227dp"
         android:onClick="resetTimer"
-        android:text="@string/reset_button" />
+        android:text="@string/reset_button"
+        android:stateListAnimator="@null"/>
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="0dp" />
+
 
 </RelativeLayout>

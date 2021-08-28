@@ -10,10 +10,14 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,6 +40,12 @@ class MainActivity : AppCompatActivity() {
     private var notificationManager: NotificationManagerCompat? = null
 
     private val workoutTimerResetAction= "WORKOUT_TIMER_RESET"
+
+    private var fragmentContainer: FrameLayout? = null
+
+    var timerChangeTool: TimerChanger? = null
+
+    var isToolRunning: Boolean = false
 
     //broadcast receiver object
     private var myReceiver: BroadcastReceiver = object: BroadcastReceiver() {
@@ -66,6 +76,8 @@ class MainActivity : AppCompatActivity() {
         updateTime()
 
         registerReceiver(myReceiver,  IntentFilter(workoutTimerResetAction))
+
+        fragmentContainer = findViewById(R.id.fragment_container)
 
     }
 
@@ -118,7 +130,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    //Called when the button to start the timer is clicked
     //The view parameter is not used but needed for Button onClick to work
     @Suppress("UNUSED_PARAMETER")
     fun onTimerButtonClick(view: View) {
@@ -178,5 +189,44 @@ class MainActivity : AppCompatActivity() {
         this.resetTimer(this.startButton as View) //Timer is reset
         super.onNewIntent(intent)
    }
+
+    //Method to be used when the textbox is clicked
+    //The view parameter is not used but needed for Button onClick to work
+    @Suppress("UNUSED_PARAMETER")
+    fun onTimerTextBoxClick(view: View){
+        if (isToolRunning){
+            back()
+            isToolRunning = false
+        }
+        else {
+            openTimerChangerFragment()
+            isToolRunning = true
+        }
+    }
+
+    fun openTimerChangerFragment(){
+        timerChangeTool =  TimerChanger.newInstance("temp1", this)
+        var fragmentManager: FragmentManager = supportFragmentManager
+        var transaction: FragmentTransaction = fragmentManager.beginTransaction()
+        transaction.setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_bottom)
+        transaction.addToBackStack(null)
+        transaction.add(R.id.fragment_container, timerChangeTool as Fragment, "TIMER_CHANGER").commit()
+
+    }
+
+    fun back(){
+        var fragmentManager: FragmentManager = supportFragmentManager
+        var transaction: FragmentTransaction = fragmentManager.beginTransaction()
+        transaction.setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_bottom)
+        transaction.remove(timerChangeTool as Fragment).commit()
+    }
+
+    fun  onOkButtonClick(view: View){
+
+        back()
+        isToolRunning = false
+
+    }
+
 
 }
