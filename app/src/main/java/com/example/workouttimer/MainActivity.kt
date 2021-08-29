@@ -18,7 +18,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import kotlin.concurrent.timer
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,9 +31,9 @@ class MainActivity : AppCompatActivity() {
 
     private var countDownTimer: CountDownTimer? = null //set to null, value changed in startTimer()
 
-    private var originalTimerNumber: Long = 6000
+    var originalTimerNumber: Long = 6000
 
-    private var timeLeftMilliseconds: Long = originalTimerNumber //Temporary, set to 10 minutes
+    var timeLeftMilliseconds: Long = originalTimerNumber //Temporary, set to 10 minutes
 
     private var timerRunning: Boolean = false //Timer is not running at launch
 
@@ -50,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         get() {
             return timerChangeTool != null //Return true if timerChangeTool fragment exists
         }
+        @Suppress("UNUSED_PARAMETER")
         set(value) = Unit //Setting a value does nothing
 
     //broadcast receiver object
@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
 
     //Called to update the timer
     fun updateTime(){
-        val minutesLeft = (timeLeftMilliseconds/60000).toInt()
+        val minutesLeft = (timeLeftMilliseconds / 60000).toInt()
 
         val secondsLeft = (timeLeftMilliseconds % 60000 / 1000).toInt()
 
@@ -205,6 +205,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openTimerChangerFragment(){
+
+        //Do not allow opening the timer changer fragment if the timer is running
+        if (timerRunning) return
+
         timerChangeTool =  TimerChanger.newInstance()
         val fragmentManager: FragmentManager = supportFragmentManager
         val transaction: FragmentTransaction = fragmentManager.beginTransaction()
