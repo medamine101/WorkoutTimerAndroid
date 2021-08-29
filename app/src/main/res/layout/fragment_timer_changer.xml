@@ -11,10 +11,10 @@
     android:layout_marginBottom="0dp"
     android:background="@android:color/holo_blue_bright"
     android:clickable="true"
-    tools:context=".TimerChanger">
+    tools:context=".TimerChanger"
+    android:focusable="true">
 
-    <!-- TODO: Update blank fragment layout -->
-
+    <!--Focusable attribute added above!-->
 
     <Button
         android:id="@+id/okButton"
@@ -24,6 +24,5 @@
         android:layout_alignParentEnd="true"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="14dp"
-        android:onClick="onOkButtonClick"
         android:text="@string/ok" />
 </RelativeLayout>

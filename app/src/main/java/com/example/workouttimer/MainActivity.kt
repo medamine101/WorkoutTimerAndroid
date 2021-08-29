@@ -18,6 +18,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import kotlin.concurrent.timer
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,13 +40,17 @@ class MainActivity : AppCompatActivity() {
 
     private var notificationManager: NotificationManagerCompat? = null
 
-    private val workoutTimerResetAction= "WORKOUT_TIMER_RESET"
+    private val workoutTimerResetAction = "WORKOUT_TIMER_RESET"
 
     private var fragmentContainer: FrameLayout? = null
 
-    var timerChangeTool: TimerChanger? = null
+    private var timerChangeTool: TimerChanger? = null
 
-    var isToolRunning: Boolean = false
+    private var isToolRunning: Boolean
+        get() {
+            return timerChangeTool != null //Return true if timerChangeTool fragment exists
+        }
+        set(value) = Unit //Setting a value does nothing
 
     //broadcast receiver object
     private var myReceiver: BroadcastReceiver = object: BroadcastReceiver() {
@@ -194,39 +199,27 @@ class MainActivity : AppCompatActivity() {
     //The view parameter is not used but needed for Button onClick to work
     @Suppress("UNUSED_PARAMETER")
     fun onTimerTextBoxClick(view: View){
-        if (isToolRunning){
-            back()
-            isToolRunning = false
-        }
-        else {
-            openTimerChangerFragment()
-            isToolRunning = true
-        }
+        if (isToolRunning) closeTimerChangerFragment()
+        else openTimerChangerFragment()
+
     }
 
-    fun openTimerChangerFragment(){
-        timerChangeTool =  TimerChanger.newInstance("temp1", this)
-        var fragmentManager: FragmentManager = supportFragmentManager
-        var transaction: FragmentTransaction = fragmentManager.beginTransaction()
+    private fun openTimerChangerFragment(){
+        timerChangeTool =  TimerChanger.newInstance()
+        val fragmentManager: FragmentManager = supportFragmentManager
+        val transaction: FragmentTransaction = fragmentManager.beginTransaction()
         transaction.setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_bottom)
         transaction.addToBackStack(null)
         transaction.add(R.id.fragment_container, timerChangeTool as Fragment, "TIMER_CHANGER").commit()
 
     }
 
-    fun back(){
-        var fragmentManager: FragmentManager = supportFragmentManager
-        var transaction: FragmentTransaction = fragmentManager.beginTransaction()
+    fun closeTimerChangerFragment(){
+        val fragmentManager: FragmentManager = supportFragmentManager
+        val transaction: FragmentTransaction = fragmentManager.beginTransaction()
         transaction.setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_bottom)
         transaction.remove(timerChangeTool as Fragment).commit()
+        timerChangeTool = null
     }
-
-    fun  onOkButtonClick(view: View){
-
-        back()
-        isToolRunning = false
-
-    }
-
 
 }

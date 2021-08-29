@@ -6,15 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
-import android.view.View.OnClickListener
 
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-//private var parentActivity: MainActivity? = null;
 
 /**
  * A simple [Fragment] subclass.
@@ -22,19 +15,16 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class TimerChanger : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
     //private var parentActivity: MainActivity? = null
     private var okButton: Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+//        arguments?.let {
+//            param1 = it.getString(ARG_PARAM1)
+//            param2 = it.getString(ARG_PARAM2)
+//        }
 
     }
 
@@ -47,34 +37,25 @@ class TimerChanger : Fragment() {
         val view =  inflater.inflate(R.layout.fragment_timer_changer, container, false)
 
         okButton = view.findViewById(R.id.okButton)
+        okButton?.setOnClickListener { onOkButtonClick(okButton as View) }
 
         return view
     }
+    @Suppress("UNUSED_PARAMETER")
+    private fun onOkButtonClick(view: View){
 
-//    fun  onOkButtonClick(view: View){
-//
-//        //parentActivity?.back()
-//        (activity as MainActivity).back()
-//
-//    }
+        (activity as MainActivity).closeTimerChangerFragment()
+
+    }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment TimerChanger.
-         */
-        // TODO: Rename and change types and number of parameters
+
         @JvmStatic
-        fun newInstance(param1: String, parent: MainActivity) =
+        fun newInstance() =
             TimerChanger().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    //putString(ARG_PARAM2, param2)
-                }
+//                arguments = Bundle().apply {
+//                    putString(ARG_PARAM1, param1)
+//                }
 
                 //parentActivity = parent
 
