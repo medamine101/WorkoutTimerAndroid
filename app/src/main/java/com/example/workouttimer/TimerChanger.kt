@@ -45,8 +45,6 @@ class TimerChanger : Fragment() {
 
         val view =  inflater.inflate(R.layout.fragment_timer_changer, container, false)
 
-//        currentTime = (activity as MainActivity).timeLeftMilliseconds
-
         okButton = view.findViewById(R.id.okButton)
         okButton?.setOnClickListener { onOkButtonClick(okButton as View) }
 
