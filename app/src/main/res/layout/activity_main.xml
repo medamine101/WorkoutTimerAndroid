@@ -16,7 +16,7 @@
         android:onClick="onTimerTextBoxClick"
         android:text="@string/TimerTextBoxInit"
         android:textAlignment="center"
-        android:textSize="40sp"/>
+        android:textSize="40sp" />
 
     <Button
         android:id="@+id/startTimerButton"
