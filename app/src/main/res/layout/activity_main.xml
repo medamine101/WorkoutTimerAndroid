@@ -8,14 +8,15 @@
 
     <TextView
         android:id="@+id/timerTextBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="265dp"
-        android:minHeight="48dp"
+        android:layout_marginTop="208dp"
         android:onClick="onTimerTextBoxClick"
-        android:text="@string/TimerTextBoxInit" />
+        android:text="@string/TimerTextBoxInit"
+        android:textAlignment="center"
+        android:textSize="40sp"/>
 
     <Button
         android:id="@+id/startTimerButton"
@@ -23,9 +24,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="301dp"
+        android:layout_marginBottom="280dp"
         android:onClick="onTimerButtonClick"
-        android:text="@string/start_button" />
+        android:text="@string/start_button"
+        android:stateListAnimator="@null"/>
 
     <Button
         android:id="@+id/resetTimerButton"
@@ -33,15 +35,15 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="227dp"
+        android:layout_marginBottom="200dp"
         android:onClick="resetTimer"
-        android:text="@string/reset_button"
-        android:stateListAnimator="@null"/>
+        android:stateListAnimator="@null"
+        android:text="@string/reset_button" />
 
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="350dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="false"
         android:layout_alignParentBottom="true"
