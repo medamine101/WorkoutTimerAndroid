@@ -1,24 +1,26 @@
 package com.example.workouttimer
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 
 
 class MainActivity : AppCompatActivity() {
 
-     // TODO: Implement way to set custom time
+    private var sp: SharedPreferences? = null
 
     //Cannot be initialized with the value of the objects since onCreate needs to occur first
     private var timerTextBox: TextView? = null //set to null, value changed in onCreate()
@@ -27,15 +29,26 @@ class MainActivity : AppCompatActivity() {
 
     private var countDownTimer: CountDownTimer? = null //set to null, value changed in startTimer()
 
-    private var originalTimerNumber: Long = 6000
+    var originalTimerNumber: Long = 6000
 
-    private var timeLeftMilliseconds: Long = originalTimerNumber //Temporary, set to 10 minutes
+    var timeLeftMilliseconds: Long = 0 //Temporary, set in OnCreate
 
     private var timerRunning: Boolean = false //Timer is not running at launch
 
     private var notificationManager: NotificationManagerCompat? = null
 
-    private val workoutTimerResetAction= "WORKOUT_TIMER_RESET"
+    private val workoutTimerResetAction = "WORKOUT_TIMER_RESET"
+
+    private var fragmentContainer: FrameLayout? = null
+
+    private var timerChangeTool: TimerChanger? = null
+
+    private var isToolRunning: Boolean
+        get() {
+            return timerChangeTool != null //Return true if timerChangeTool fragment exists
+        }
+        @Suppress("UNUSED_PARAMETER")
+        set(value) = Unit //Setting a value does nothing
 
     //broadcast receiver object
     private var myReceiver: BroadcastReceiver = object: BroadcastReceiver() {
@@ -55,6 +68,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //Get originalTimerNumber from save data
+        val test: Long = 10000
+        sp = getSharedPreferences("TimerPrefs", MODE_PRIVATE)
+        if (sp != null){
+            originalTimerNumber = sp!!.getLong("TimerSetting", test)
+            timeLeftMilliseconds = originalTimerNumber
+        }
+
         //These class properties are now assigned values corresponding to the UI objects
         timerTextBox = findViewById(R.id.timerTextBox)
         startButton = findViewById(R.id.startTimerButton)
@@ -67,11 +88,15 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(myReceiver,  IntentFilter(workoutTimerResetAction))
 
+        fragmentContainer = findViewById(R.id.fragment_container)
+
     }
 
     //Unregister the broadcast receiver when user quits app
+    @SuppressLint("ApplySharedPref")
     override fun onDestroy() {
         super.onDestroy()
+
         unregisterReceiver(myReceiver)
     }
 
@@ -104,7 +129,7 @@ class MainActivity : AppCompatActivity() {
 
     //Called to update the timer
     fun updateTime(){
-        val minutesLeft = (timeLeftMilliseconds/60000).toInt()
+        val minutesLeft = (timeLeftMilliseconds / 60000).toInt()
 
         val secondsLeft = (timeLeftMilliseconds % 60000 / 1000).toInt()
 
@@ -118,7 +143,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    //Called when the button to start the timer is clicked
     //The view parameter is not used but needed for Button onClick to work
     @Suppress("UNUSED_PARAMETER")
     fun onTimerButtonClick(view: View) {
@@ -178,5 +202,45 @@ class MainActivity : AppCompatActivity() {
         this.resetTimer(this.startButton as View) //Timer is reset
         super.onNewIntent(intent)
    }
+
+    //Method to be used when the textbox is clicked
+    //The view parameter is not used but needed for Button onClick to work
+    @Suppress("UNUSED_PARAMETER")
+    fun onTimerTextBoxClick(view: View){
+        if (isToolRunning) closeTimerChangerFragment()
+        else openTimerChangerFragment()
+
+    }
+
+    private fun openTimerChangerFragment(){
+
+        //Do not allow opening the timer changer fragment if the timer is running
+        if (timerRunning) return
+
+        timerChangeTool =  TimerChanger.newInstance()
+        val fragmentManager: FragmentManager = supportFragmentManager
+        val transaction: FragmentTransaction = fragmentManager.beginTransaction()
+        transaction.setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_bottom)
+        transaction.addToBackStack(null)
+        transaction.add(R.id.fragment_container, timerChangeTool as Fragment, "TIMER_CHANGER").commit()
+
+    }
+
+    fun closeTimerChangerFragment(){
+        val fragmentManager: FragmentManager = supportFragmentManager
+        val transaction: FragmentTransaction = fragmentManager.beginTransaction()
+        transaction.setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_bottom)
+        transaction.remove(timerChangeTool as Fragment).commit()
+        timerChangeTool = null
+
+        //Save chosen time for originalTimerNumber
+        val editor: SharedPreferences.Editor? = sp?.edit()
+        if (editor != null) {
+            editor.clear()
+            editor.putLong("TimerSetting", originalTimerNumber)
+            editor.apply()
+        }
+
+    }
 
 }
